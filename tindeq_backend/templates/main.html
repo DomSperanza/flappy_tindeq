@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tindeq Logger</title>
+    <script>
+        var eventSource;
+
+        function startLogging() {
+            fetch('/start_logging'); // Start logging on the server
+            eventSource = new EventSource('/stream'); // Start receiving the stream
+            eventSource.onmessage = function(event) {
+                document.getElementById('dataStream').innerHTML += event.data + '<br>';
+            };
+        }
+
+        function stopLogging() {
+            if (eventSource) {
+                eventSource.close(); // Stop receiving the stream
+                fetch('/stop_logging'); // Stop logging on the server
+            }
+        }
+    </script>
+</head>
+<body>
+    <button onclick="startLogging()">Start Logging</button>
+    <button onclick="stopLogging()">Stop Logging</button>
+    <div id="dataStream">
+        <!-- Streamed data will appear here -->
+    </div>
+</body>
+</html>

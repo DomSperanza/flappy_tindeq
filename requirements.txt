@@ -1,3 +1,7 @@
 #Bleak
 bleak
 
+#Flask related stuff
+Flask
+Flask-Cors
+Flask-RESTful

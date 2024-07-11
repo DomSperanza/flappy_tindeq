@@ -52,6 +52,7 @@ class TindeqProgressor(object):
         self.info_struct = struct.Struct("<bb")
         self.data_struct = struct.Struct("<fl")
         self._tare_value = 0.0
+        self.is_connected = False
 
     async def __aenter__(self):
         await self.connect()
@@ -97,10 +98,11 @@ class TindeqProgressor(object):
         self.client = None
 
     async def connect(self):
+        if self.is_connected:
+            return True
         print("Searching for progressor...")
         scanner = BleakScanner()
         devices = await scanner.discover(timeout=20.0)
-        print(devices)
         TARGET_NAME = "Progressor"
         address = None
         for d in devices:
@@ -124,6 +126,7 @@ class TindeqProgressor(object):
             )
         else:
             raise RuntimeError("could not connect to progressor")
+        self.is_connected = True
         return success
 
     def _pack(self, cmd):
