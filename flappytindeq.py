@@ -6,30 +6,35 @@ from tindeq_backend.tindeq import TindeqProgressor
 # Initialize Pygame
 pygame.init()
 
+# Scaling factor
+SCALE = 3  # Adjust this value to scale the entire game
+
 # Screen dimensions
-WIDTH, HEIGHT = 800, 600
+WIDTH, HEIGHT = int(800 * SCALE), int(600 * SCALE)
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Flappy Bird")
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 
 # Bird properties
-bird_x = 50
+bird_x = int(50 * SCALE)
 bird_y = HEIGHT // 2
+bird_radius = int(10 * SCALE)
 
 # Pipe properties
-pipe_width = 100
-pipe_gap = 200
-pipe_speed = 5
-pipe_frequency = 1500  # milliseconds
+pipe_width = int(100 * SCALE)
+pipe_gap = int(200 * SCALE)
+pipe_speed = int(5 * SCALE)
+pipe_frequency = int(1500 )  # milliseconds
 last_pipe = pygame.time.get_ticks() - pipe_frequency
 
 pipes = []
 
 def draw_bird():
-    pygame.draw.circle(screen, BLACK, (bird_x, int(bird_y)), 20)
+    pygame.draw.circle(screen, RED, (bird_x, int(bird_y)), bird_radius)
 
 def draw_pipes():
     for pipe in pipes:
@@ -42,7 +47,7 @@ def update_pipes():
     pipes = [pipe for pipe in pipes if pipe.x + pipe_width > 0]
 
 def create_pipe():
-    height = random.randint(100, HEIGHT - 100 - pipe_gap)
+    height = random.randint(int(100 * SCALE), HEIGHT - int(100 * SCALE) - pipe_gap)
     top_pipe = pygame.Rect(WIDTH, 0, pipe_width, height)
     bottom_pipe = pygame.Rect(WIDTH, height + pipe_gap, pipe_width, HEIGHT - height - pipe_gap)
     pipes.append(top_pipe)
@@ -50,7 +55,7 @@ def create_pipe():
 
 def check_collision():
     return False
-    bird_rect = pygame.Rect(bird_x - 20, bird_y - 20, 40, 40)
+    bird_rect = pygame.Rect(bird_x - bird_radius, bird_y - bird_radius, bird_radius * 2, bird_radius * 2)
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
             return True
@@ -133,7 +138,7 @@ async def main_game(weight_queue, initialization_complete):
         if check_collision():
             running = False
 
-        await asyncio.sleep(0.03)   # Cap the frame rate at 30 FPS
+        await asyncio.sleep(0.03)  # Cap the frame rate at 30 FPS
 
     pygame.quit()
 
@@ -149,3 +154,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
