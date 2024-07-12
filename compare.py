@@ -118,7 +118,7 @@ async def title_screen(initialization_complete):
         screen.blit(text, (WIDTH // 2 - text.get_width() // 2, HEIGHT // 4))
         font = pygame.font.Font(None, 36)
         
-		 # Show "Initializing..." until the Tindeq initialization is complete
+        # Show "Initializing..." until the Tindeq initialization is complete
         if initialization_complete.is_set():
             text = font.render("Click to Start", True, BLACK)
         else:
@@ -129,7 +129,6 @@ async def title_screen(initialization_complete):
         await asyncio.sleep(0.03)   # Cap the frame rate at 30 FPS
 
 async def main_game(weight_queue):
-   
     global bird_y, last_pipe, pipes  # Ensure these are global
 
     weight_min = 5
@@ -168,7 +167,7 @@ async def main_game(weight_queue):
         if check_collision():
             running = False
 
-        await asyncio.sleep(0.03)
+        clock.tick(30)  # Cap the frame rate at 30 FPS
 
     pygame.quit()
 
