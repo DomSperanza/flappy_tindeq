@@ -155,7 +155,7 @@ async def main_game(weight_queue, initialization_complete):
     begin = True
 
     while begin:
-        clock.tick(TARGET_SCREEN_WIDTH/100)
+        clock.tick(TARGET_SCREEN_WIDTH/50)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -184,7 +184,7 @@ async def main_game(weight_queue, initialization_complete):
     weight_max = 20
 
     while True:
-        clock.tick(TARGET_SCREEN_WIDTH/100)
+        clock.tick(TARGET_SCREEN_WIDTH/50)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()

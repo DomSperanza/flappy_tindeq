@@ -103,7 +103,7 @@ class TindeqProgressor(object):
         print("Searching for progressor...")
         scanner = BleakScanner()
         devices = await scanner.discover(timeout=5.0)
-        TARGET_NAME = "Progressor_2263"
+        TARGET_NAME = "Progressor"
         address = None
         for d in devices:
             if (
