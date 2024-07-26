@@ -14,7 +14,7 @@ SCALING_FACTOR = TARGET_SCREEN_WIDTH / 400
 
 SCREEN_WIDTH = int(400 * SCALING_FACTOR)
 SCREEN_HEIGHT = int(600 * SCALING_FACTOR)
-GAME_SPEED = 15
+GAME_SPEED = 20
 
 GROUND_WIDTH = 2 * SCREEN_WIDTH
 GROUND_HEIGHT = int(100 * SCALING_FACTOR)
@@ -22,7 +22,7 @@ GROUND_HEIGHT = int(100 * SCALING_FACTOR)
 PIPE_WIDTH = int(80 * SCALING_FACTOR)
 PIPE_HEIGHT = int(500 * SCALING_FACTOR)
 
-PIPE_GAP = int(150 * SCALING_FACTOR)
+PIPE_GAP = int(10 * SCALING_FACTOR)
 
 wing = 'assets/audio/wing.wav'
 hit = 'assets/audio/hit.wav'
@@ -63,7 +63,7 @@ class Pipe(pygame.sprite.Sprite):
         self.rect[0] = xpos
         if inverted:
             self.image = pygame.transform.flip(self.image, False, True)
-            self.rect[1] = -(self.rect[3] - ysize)
+            self.rect[1] = -(SCREEN_HEIGHT-ysize)
         else:
             self.rect[1] = SCREEN_HEIGHT - ysize
         self.mask = pygame.mask.from_surface(self.image)
@@ -87,7 +87,7 @@ def is_off_screen(sprite):
     return sprite.rect[0] < -(sprite.rect[2])
 
 def get_random_pipes(xpos):
-    size = random.randint(int(100 * SCALING_FACTOR), int(300 * SCALING_FACTOR))
+    size = random.randint(int(100 * SCALING_FACTOR), int((TARGET_SCREEN_HEIGHT-100) * SCALING_FACTOR))
     pipe = Pipe(False, xpos, size)
     pipe_inverted = Pipe(True, xpos, SCREEN_HEIGHT - size - PIPE_GAP)
     return pipe, pipe_inverted
@@ -127,6 +127,7 @@ async def tindeq_task(weight_queue, initialization_complete):
         await log_weight(tindeq, weight_queue)
 
 async def main_game(weight_queue, initialization_complete):
+    GAME_SPEED = 20
     await initialization_complete.wait()  # Wait for initialization to complete
 
     pygame.init()
@@ -153,8 +154,12 @@ async def main_game(weight_queue, initialization_complete):
 
     clock = pygame.time.Clock()
     begin = True
-
+    weight_min =0
+    weight_max = 40
+    
     while begin:
+
+
         clock.tick(TARGET_SCREEN_WIDTH/50)
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -165,6 +170,12 @@ async def main_game(weight_queue, initialization_complete):
                     pygame.mixer.music.load(wing)
                     pygame.mixer.music.play()
                     begin = False
+
+        while not weight_queue.empty():
+            weight = await weight_queue.get()
+            mapped_weight = SCREEN_HEIGHT - ((weight - weight_min) / (weight_max - weight_min) * SCREEN_HEIGHT)
+            bird.set_position(mapped_weight)
+            print(f"Weight: {weight}, Bird Y: {bird.rect[1]}, Min: {weight_min}, Max: {weight_max}")
 
         screen.blit(BACKGROUND, (0, 0))
         screen.blit(BEGIN_IMAGE, (SCREEN_WIDTH // 2 - BEGIN_IMAGE.get_width() // 2, SCREEN_HEIGHT // 2 - BEGIN_IMAGE.get_height() // 2))
@@ -179,11 +190,18 @@ async def main_game(weight_queue, initialization_complete):
         bird_group.draw(screen)
         ground_group.draw(screen)
         pygame.display.update()
+        await asyncio.sleep(0.03)
 
-    weight_min = 5
-    weight_max = 20
 
+
+    weight_min =0
+    weight_max = 35
+
+    
+    speed_up = .01
     while True:
+        speed_up = speed_up+.01
+        GAME_SPEED = GAME_SPEED+speed_up
         clock.tick(TARGET_SCREEN_WIDTH/50)
         for event in pygame.event.get():
             if event.type == QUIT:
@@ -223,7 +241,8 @@ async def main_game(weight_queue, initialization_complete):
         if pygame.sprite.spritecollide(bird, pipe_group,False,pygame.sprite.collide_mask):
             pygame.mixer.music.load(hit)
             pygame.mixer.music.play()
-            time.sleep(1)
+            time.sleep(5)
+
             break
         await asyncio.sleep(0.03)
 
