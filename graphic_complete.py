@@ -22,7 +22,7 @@ GROUND_HEIGHT = int(100 * SCALING_FACTOR)
 PIPE_WIDTH = int(80 * SCALING_FACTOR)
 PIPE_HEIGHT = int(500 * SCALING_FACTOR)
 
-PIPE_GAP = int(10 * SCALING_FACTOR)
+PIPE_GAP = int(100 * SCALING_FACTOR)
 
 wing = 'assets/audio/wing.wav'
 hit = 'assets/audio/hit.wav'
@@ -56,17 +56,26 @@ class Bird(pygame.sprite.Sprite):
         self.image = self.images[self.current_image]
 
 class Pipe(pygame.sprite.Sprite):
+
     def __init__(self, inverted, xpos, ysize):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(pygame.image.load('assets/sprites/pipe-green.png').convert_alpha(), (PIPE_WIDTH, PIPE_HEIGHT))
+
+        self. image = pygame.image.load('assets/sprites/pipe-green.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (PIPE_WIDTH, PIPE_HEIGHT))
+
+
         self.rect = self.image.get_rect()
         self.rect[0] = xpos
+
         if inverted:
             self.image = pygame.transform.flip(self.image, False, True)
-            self.rect[1] = -(SCREEN_HEIGHT-ysize)
+            self.rect[1] = - (self.rect[3] - ysize)
         else:
             self.rect[1] = SCREEN_HEIGHT - ysize
+
+
         self.mask = pygame.mask.from_surface(self.image)
+
 
     def update(self):
         self.rect[0] -= GAME_SPEED
@@ -87,10 +96,30 @@ def is_off_screen(sprite):
     return sprite.rect[0] < -(sprite.rect[2])
 
 def get_random_pipes(xpos):
-    size = random.randint(int(100 * SCALING_FACTOR), int((TARGET_SCREEN_HEIGHT-100) * SCALING_FACTOR))
-    pipe = Pipe(False, xpos, size)
-    pipe_inverted = Pipe(True, xpos, SCREEN_HEIGHT - size - PIPE_GAP)
-    return pipe, pipe_inverted
+    """
+    Generate a pair of pipes (upper and lower) with sizes scaled based on SCREEN_HEIGHT and PIPE_GAP.
+
+    Parameters:
+        xpos (int): The x-coordinate where the pipes will be placed.
+
+    Returns:
+        tuple: A tuple containing the lower pipe and the inverted upper pipe.
+    """
+    # Define minimum and maximum pipe heights as a fraction of SCREEN_HEIGHT
+    MIN_PIPE_HEIGHT = int(100 * SCALING_FACTOR)  # Adjust as needed
+    MAX_PIPE_HEIGHT = SCREEN_HEIGHT - PIPE_GAP - MIN_PIPE_HEIGHT
+
+    # Randomly select a height for the lower pipe within the defined range
+    lower_pipe_height = random.randint(MIN_PIPE_HEIGHT, MAX_PIPE_HEIGHT)
+
+    # Calculate the corresponding height for the upper pipe to maintain PIPE_GAP
+    upper_pipe_height = SCREEN_HEIGHT - PIPE_GAP - lower_pipe_height
+
+    # Create lower and upper pipes with the calculated heights
+    lower_pipe = Pipe(False, xpos, lower_pipe_height)
+    upper_pipe = Pipe(True, xpos, upper_pipe_height)
+
+    return lower_pipe, upper_pipe
 
 class Wrapper:
     def __init__(self, weight_queue):
